@@ -1,127 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文件管理器</title>
-    <style>
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-        .upload-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .file-list {
-            margin-top: 20px;
-        }
-        .file-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        .file-name {
-            flex: 1;
-            margin: 0 10px;
-        }
-        button {
-            padding: 5px 10px;
-            margin: 0 3px;
-            cursor: pointer;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 3px;
-        }
-        input[type="text"] {
-            padding: 5px;
-            margin: 0 5px;
-            width: 200px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <div class="upload-section">
             <input type="file" id="fileInput">
-            <button onclick="uploadFile()">上传文件</button>
+            <label for="fileInput">选择文件并上传</label>
         </div>
         <div class="file-list" id="fileList"></div>
     </div>
-
-    <script>
-        async function uploadFile() {
-            const input = document.getElementById('fileInput');
-            const file = input.files[0];
-            
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    alert('上传成功');
-                    loadFiles();
-                }
-            } catch (error) {
-                alert('上传失败');
-            }
-        }
-
-        async function loadFiles() {
-            const response = await fetch('/files');
-            const files = await response.json();
-            const list = document.getElementById('fileList');
-            list.innerHTML = '';
-
-            files.forEach(file => {
-                const div = document.createElement('div');
-                div.className = 'file-item';
-                
-                div.innerHTML = `
-                    <span class="file-name">${file}</span>
-                    <input type="text" id="newName-${file}" placeholder="新文件名">
-                    <button onclick="renameFile('${file}')">重命名</button>
-                    <button onclick="downloadFile('${file}')">下载</button>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        async function renameFile(oldName) {
-            const newName = document.getElementById(`newName-${oldName}`).value;
-            if (!newName) return;
-
-            try {
-                const response = await fetch('/rename', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ oldName, newName })
-                });
-                
-                if (response.ok) {
-                    loadFiles();
-                }
-            } catch (error) {
-                alert('重命名失败');
-            }
-        }
-
-        function downloadFile(filename) {
-            window.open(`/download?filename=${encodeURIComponent(filename)}`, '_blank');
-        }
-
-        // 初始化加载文件列表
-        loadFiles();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
