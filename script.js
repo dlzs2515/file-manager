@@ -1,4 +1,4 @@
-const WORKER_URL = "https://your-worker-name.your-subdomain.workers.dev"; // 替换为您的 Worker URL
+const WORKER_URL = "https://file-manager.3127500373.workers.dev/"; // 替换为您的 Worker URL
 
 // 上传文件
 async function uploadFile() {
