@@ -1,6 +1,7 @@
-const WORKER_URL = "https://file-manager.3127500373.workers.dev/"; // 替换为您的 Worker URL
+const WORKER_URL = "https://file-manager.3127500373.workers.dev"; // 替换为您的 Worker URL
+const CHUNK_SIZE = 5 * 1024 * 1024; // 每块 5MB
 
-// 上传文件
+// 上传文件（分块）
 async function uploadFile() {
     const input = document.getElementById('fileInput');
     const file = input.files[0];
@@ -10,19 +11,33 @@ async function uploadFile() {
         return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
     try {
-        const response = await fetch(`${WORKER_URL}/upload`, {
-            method: 'POST',
-            body: formData
-        });
-        if (response.ok) {
-            alert('上传成功');
-            loadFiles();
+        for (let i = 0; i < totalChunks; i++) {
+            const chunk = file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const formData = new FormData();
+            formData.append('file', chunk);
+            formData.append('chunkIndex', i);
+            formData.append('totalChunks', totalChunks);
+            formData.append('fileName', file.name);
+
+            const response = await fetch(`${WORKER_URL}/upload-chunk`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('上传分块失败');
+            }
+
+            console.log(`分块 ${i + 1}/${totalChunks} 上传成功`);
         }
+
+        alert('文件上传成功');
+        loadFiles();
     } catch (error) {
+        console.error('上传失败:', error);
         alert('上传失败');
     }
 }
